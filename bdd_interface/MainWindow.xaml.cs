@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,22 +20,17 @@ namespace bdd_interface
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+   
     public partial class MainWindow : Window
     {
+        Process proc = null;
         int tableSize = 4;
-        Color whiteColor = Color.FromRgb(248, 230, 173);
-        Color blackColor = Color.FromRgb(183, 134, 94);
+        Color whiteColor = Colors.WhiteSmoke;
+        Color blackColor = Colors.Gray;
         public MainWindow()
         {
             InitializeComponent();
-
-            ProcessStartInfo procInfo = new ProcessStartInfo();
-            procInfo.FileName = "cudd.exe";
-            procInfo.Arguments = "11";            
-            procInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            
-            Process proc=Process.Start(procInfo);
-            proc.Kill();
+        
 
             grid.Background = new SolidColorBrush(Colors.Gray);
             Grid newTable = createTable(tableSize);
@@ -92,5 +88,34 @@ namespace bdd_interface
             image.Source = new BitmapImage(source);
             table.Children.Add(image);
         }
+
+        private void Button_Click_Go(object sender, RoutedEventArgs e)
+        {
+            if (proc != null)
+                proc.Kill();
+            ProcessStartInfo procInfo = new ProcessStartInfo();
+            procInfo.FileName = getNameOfTactic();
+            procInfo.Arguments = getSizeOfTable();
+            procInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            proc = Process.Start(procInfo);
+            
+        }
+
+        private string getNameOfTactic()
+        {
+            throw new NotImplementedException();
+        }
+
+        private string getSizeOfTable()
+        {
+            throw new NotImplementedException();
+        }
+        protected override void OnClosed(EventArgs e)
+        {
+            if (proc != null)
+                proc.Kill();
+            base.OnClosed(e);
+        }
+
     }
 }

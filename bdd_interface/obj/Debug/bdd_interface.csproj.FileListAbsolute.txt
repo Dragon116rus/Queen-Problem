@@ -26,3 +26,7 @@ C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_in
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface.g.resources
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface.Properties.Resources.resources
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface.csproj.GenerateResource.Cache
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\Styles\CustomizedWindow\VS2012WindowStyle.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\themes\generic.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\Styles\CustomizedWindow\VS2012WindowStyle.g.cs
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\App.baml
