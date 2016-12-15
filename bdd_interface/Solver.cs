@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace bdd_interface
@@ -10,6 +12,6 @@ namespace bdd_interface
     {
         public string pathOfSolve;
         public string pathOfCountOfSolve;
-        public abstract void proccess(int n);
+        public abstract Tuple<Process, Thread> proccess(int n);
     }
 }

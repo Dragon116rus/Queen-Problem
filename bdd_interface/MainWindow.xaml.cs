@@ -27,17 +27,18 @@ namespace bdd_interface
         int tableSize = 4;
         Color whiteColor = Colors.WhiteSmoke;
         Color blackColor = Colors.Gray;
+        BDDSolver solver;
         public MainWindow()
         {
             InitializeComponent();
         
 
-            grid.Background = new SolidColorBrush(Colors.Gray);
-            Grid newTable = createTable(tableSize);
-            newTable.SetValue(Grid.RowProperty, 1);
-            newTable.SetValue(Grid.ColumnProperty, 1);
-            setCell(newTable, 1, 1);
-            grid.Children.Add(newTable);
+            //grid.Background = new SolidColorBrush(Colors.Gray);
+            //Grid newTable = createTable(tableSize);
+            //newTable.SetValue(Grid.RowProperty, 1);
+            //newTable.SetValue(Grid.ColumnProperty, 1);
+            //setCell(newTable, 1, 1);
+            //grid.Children.Add(newTable);
         }
 
         public Grid createTable(int sizeOfTable)
@@ -93,23 +94,18 @@ namespace bdd_interface
         {
             if (proc != null)
                 proc.Kill();
-            ProcessStartInfo procInfo = new ProcessStartInfo();
-            procInfo.FileName = getNameOfTactic();
-            procInfo.Arguments = getSizeOfTable();
-            procInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            proc = Process.Start(procInfo);
+            solver = new BDDSolver();
+            solver.gettedCount += Solver_gettedCount;
+
+            solver.proccess(4);
+           
+        }
+
+        private void Solver_gettedCount(int countOfSolve, string pathOfSolve)
+        {
             
         }
 
-        private string getNameOfTactic()
-        {
-            throw new NotImplementedException();
-        }
-
-        private string getSizeOfTable()
-        {
-            throw new NotImplementedException();
-        }
         protected override void OnClosed(EventArgs e)
         {
             if (proc != null)
