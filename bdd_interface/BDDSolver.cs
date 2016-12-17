@@ -6,49 +6,56 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace bdd_interface
 {
-    class BDDSolver : Solver
+    class BDDSolver 
     {
-        public override Tuple<Process,Thread> proccess(int n)
+        public delegate void ToCheckResult(int n);
+        public Process proccess(int n)
         {
             Process proc;
             ProcessStartInfo procInfo = new ProcessStartInfo();
-            procInfo.FileName = "cudd.exe";
+            procInfo.WorkingDirectory = @"solvers";
+            procInfo.FileName = @"cudd.exe";
             procInfo.Arguments = n.ToString();
             procInfo.WindowStyle = ProcessWindowStyle.Hidden;
             proc = Process.Start(procInfo);
-            Thread thread = new Thread(new ThreadStart(checkResults));
-            thread.Start();
-            return new Tuple<Process,Thread>(proc,thread);
+            
+            return proc;
         }
-        public delegate void ResultHandler(int countOfSolve, string pathOfSolve);
+        public delegate void ResultHandler(int countOfSolve, string pathOfSolve,int n);
         public event ResultHandler gettedCount;
 
-        private void checkResults()
+      
+
+
+        private void checkResults(int n)
         {
             
-            string nameOfResult = "bdd_sol.txt";
-            string nameOfSolve = "bdd_count.txt";
-            pathOfSolve = nameOfSolve;
-            int countOfSolve=0;
+            string pathToSolves = "solvers/cudd_solves.txt";
+            string pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
+            string pathIsFinish = "solvers/cudd_finished.txt";
+            int countOfSolve=-1;
             while (true)
             {
-                if (File.Exists(nameOfResult))
+                if (File.Exists(pathIsFinish))
                 {
-                    using (StreamReader sr=new StreamReader(nameOfSolve))
+                    using (StreamReader sr=new StreamReader(pathToCountOfSolves))
                     {
                         var s=sr.ReadLine();
                         if (int.TryParse(s,out countOfSolve))
                         {
-                            gettedCount(countOfSolve, pathOfSolve);
-                            File.Delete(nameOfResult);
+                        //    gettedCount(countOfSolve, pathToSolves, (int)n);
+                            Thread.Sleep(100);
+                            File.Delete(pathIsFinish);
                             return;
                         }
                     }
                 }
-
+                Thread.Sleep(500);
             }
         }
     }

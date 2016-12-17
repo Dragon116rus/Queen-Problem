@@ -10,8 +10,7 @@ namespace bdd_interface
 {
     public abstract class  Solver
     {
-        public string pathOfSolve;
-        public string pathOfCountOfSolve;
+       
         public abstract Tuple<Process, Thread> proccess(int n);
     }
 }
