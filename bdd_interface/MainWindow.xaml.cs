@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +13,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -32,11 +34,14 @@ namespace bdd_interface
         string[] solves;
         int countOfSolves;
         int tableSize;
+        string pathToSolves;
+        string pathToCountOfSolves;
         public MainWindow()
         {
             InitializeComponent();
-
-
+            initLoandingAnimation();
+            importButton.Visibility = Visibility.Hidden;
+            socketToLoandingAnimation.Visibility = Visibility.Hidden;
             //grid.Background = new SolidColorBrush(Colors.Gray);
             //Grid newTable = createTable(tableSize);
             //newTable.SetValue(Grid.RowProperty, 1);
@@ -93,7 +98,7 @@ namespace bdd_interface
             image.Source = new BitmapImage(source);
             table.Children.Add(image);
         }
-        public delegate void WaitToEndOfProccess();
+        public delegate void WaitToEndOfProccess(int n);
         private void Button_Click_Go(object sender, RoutedEventArgs e)
         {
 
@@ -102,7 +107,7 @@ namespace bdd_interface
                 if (!proc.HasExited)
                 {
                     proc.Kill();
-                }                
+                }
             }
             showLoandingAnimation();
             solver = new BDDSolver();
@@ -111,7 +116,9 @@ namespace bdd_interface
             {
                 proc = solver.proccess(n);
                 WaitToEndOfProccess waitToEndOfProccess = checkProccessIsEnd;
-                waitToEndOfProccess.BeginInvoke(new AsyncCallback(showSolve), new Tuple<int, int>(0, n));
+                waitToEndOfProccess.BeginInvoke(n, new AsyncCallback(showSolve), new Tuple<int, int>(0, n));
+
+
             }
             else
             {
@@ -122,12 +129,76 @@ namespace bdd_interface
 
         private void showLoandingAnimation()
         {
-            throw new NotImplementedException();
+            importButton.Visibility = Visibility.Hidden;
+            socketToLoandingAnimation.Visibility = Visibility.Visible;
+        }
+
+        private void initLoandingAnimation()
+        {
+            Image image = new Image();
+            Uri source = new Uri(@"/bdd_interface;component/img/loanding.gif", UriKind.Relative);
+            image.Source = new BitmapImage(source);
+
+
+            var rotation = new RotateTransform(0);
+            var rotationAnimation = new DoubleAnimation(0, 360, TimeSpan.FromSeconds(5));
+            rotationAnimation.RepeatBehavior = RepeatBehavior.Forever;
+
+
+            rotation.BeginAnimation(RotateTransform.AngleProperty, rotationAnimation);
+            image.LayoutTransform = rotation;
+            socketToLoandingAnimation.Child = image;
+            socketToLoandingAnimation.Visibility = Visibility.Hidden;
         }
         private void deleteLoandingAnimation()
         {
-            throw new NotImplementedException();
+            socketToLoandingAnimation.Visibility = Visibility.Hidden;
+            importButton.Visibility = Visibility.Visible;
         }
+
+        private void Button_Click_Export_Solves(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.ShowDialog();
+            exportSolves(sfd.FileName, solves, tableSize);
+        }
+
+        private void exportSolves(string fileName, string[] solves, int tableSize)
+        {
+            try
+            {
+                int countOfSolves = 0;
+                using (StreamReader sr = new StreamReader(pathToCountOfSolves))
+                {
+                    string count = sr.ReadLine();
+                    countOfSolves = int.Parse(count);
+                }
+                using (StreamReader sr = new StreamReader(pathToSolves))
+                {
+                    using (StreamWriter sw = new StreamWriter(fileName))
+                    {
+                        for (int i=0;i< countOfSolves;i++)
+                        {
+                            string solve = sr.ReadLine();
+                            for (int k = 0; k < tableSize; k++)
+                            {
+                                for (int j = 0; j < tableSize; j++)
+                                {
+                                    sw.Write(solve[k * tableSize + j]);
+                                }
+                                sw.WriteLine();
+                            }
+                            sw.WriteLine();
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show("Ошибка экспорта данных");
+            }
+        }
+
         private void Button_Show_Next_Solve(object sender, RoutedEventArgs e)
         {
             if (solves == null)
@@ -174,7 +245,7 @@ namespace bdd_interface
                 int n = ((Tuple<int, int>)resObj.AsyncState).Item2;
 
                 tableSize = n;
-                importSolves();
+                importSolves(n);
                 Grid newTable = newTable = createTable(n);
                 newTable.SetValue(Grid.RowProperty, 1);
                 newTable.SetValue(Grid.ColumnProperty, 1);
@@ -193,7 +264,7 @@ namespace bdd_interface
             });
         }
 
-        
+
 
         public void showSolve(int numberOfSolve, int n)
         {
@@ -219,11 +290,11 @@ namespace bdd_interface
                 grid.Children.Add(newTable);
             });
         }
-        public void importSolves()
+        public void importSolves(int n)
         {
 
-            string pathToSolves = "solvers/cudd_solves.txt";
-            string pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
+            pathToSolves = "solvers/cudd_solves.txt";
+            pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
 
             try
             {
@@ -249,10 +320,10 @@ namespace bdd_interface
             {
                 using (StreamReader sr = new StreamReader(pathToSolves))
                 {
-                    solves = new string[Math.Min(100, countOfSolves)];
-                    for (int i = 0; i < Math.Min(100, countOfSolves); i++)
+                    solves = new string[Math.Min(600, countOfSolves)];
+                    for (int i = 0; i < Math.Min(600, countOfSolves); i++)
                     {
-                        solves[i] = sr.ReadLine();
+                        solves[i] = sr.ReadLine().Substring(0, n * n);
                     }
                 }
             }
@@ -262,7 +333,24 @@ namespace bdd_interface
             }
 
         }
-        public void checkProccessIsEnd()
+        bool isItTrueFile(string pathIsFinish, int n)
+        {
+            using (StreamReader sr = new StreamReader(pathIsFinish))
+            {
+                int newN;
+                var s = sr.ReadLine();
+                if (int.TryParse(s, out newN))
+                {
+                    if (newN == n)
+                        return true;
+                    else
+                        return false;
+                }
+
+            }
+            return false;
+        }
+        public void checkProccessIsEnd(int n)
         {
             string pathToSolves = "solvers/cudd_solves.txt";
             string pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
@@ -272,15 +360,16 @@ namespace bdd_interface
             {
                 if (File.Exists(pathIsFinish))
                 {
-                    using (StreamReader sr = new StreamReader(pathToCountOfSolves))
-                    {
-                        var s = sr.ReadLine();
-                        if (int.TryParse(s, out countOfSolve))
+                    if (isItTrueFile(pathIsFinish, n))
+                        using (StreamReader sr = new StreamReader(pathToCountOfSolves))
                         {
-                            File.Delete(pathIsFinish);
-                            return;
+                            var s = sr.ReadLine();
+                            if (int.TryParse(s, out countOfSolve))
+                            {
+                                File.Delete(pathIsFinish);
+                                return;
+                            }
                         }
-                    }
                 }
                 Thread.Sleep(500);
             }

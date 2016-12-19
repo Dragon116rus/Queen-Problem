@@ -112,6 +112,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="cudd.exe" />
+    <Resource Include="img\download.png" />
+    <Resource Include="img\loanding.gif" />
     <Resource Include="mainicon.ico" />
     <Resource Include="img\arrow.png" />
   </ItemGroup>
