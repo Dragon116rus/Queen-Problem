@@ -1,0 +1,16 @@
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\bin\Release\bdd_interface.exe.config
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\bin\Release\bdd_interface.exe
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\bin\Release\bdd_interface.pdb
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\MainWindow.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\Styles\CustomizedWindow\VS2012WindowStyle.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\themes\generic.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\App.baml
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\MainWindow.g.cs
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\Styles\CustomizedWindow\VS2012WindowStyle.g.cs
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\App.g.cs
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface_MarkupCompile.cache
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.g.resources
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.Properties.Resources.resources
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.csproj.GenerateResource.Cache
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.exe
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.pdb
