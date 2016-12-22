@@ -21,7 +21,6 @@ C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_in
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\MainWindow.baml
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\MainWindow.g.cs
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\App.g.cs
-C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface_Content.g.cs
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface_MarkupCompile.cache
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface.g.resources
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface\bdd_interface\obj\Debug\bdd_interface.Properties.Resources.resources

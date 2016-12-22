@@ -33,6 +33,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup />
+  <PropertyGroup>
+    <ApplicationIcon>mainicon.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -54,7 +58,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BDDSolver.cs" />
-    <Compile Include="Solver.cs" />
+    <Compile Include="Bruteforce.cs" />
     <Compile Include="Styles\CustomizedWindow\VS2012WindowStyle.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -111,13 +115,17 @@
     <Resource Include="img\white.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="cudd.exe" />
     <Resource Include="img\download.png" />
     <Resource Include="img\loanding.gif" />
     <Resource Include="mainicon.ico" />
     <Resource Include="img\arrow.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="img\background.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="img\icon.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
