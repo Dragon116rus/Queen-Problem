@@ -30,6 +30,7 @@ namespace bdd_interface
         Color whiteColor = Colors.WhiteSmoke;
         Color blackColor = Colors.Gray;
 
+
         int currentSolve = 0;
         string[] solves;
         int countOfSolves;
@@ -38,7 +39,8 @@ namespace bdd_interface
         string pathToCountOfSolves;
         int currentTactic = 0;
         string[] tacticNames = { "CUDD(fast)", "Полный перебор", "Урезаный перебор" };
-
+        Thread currentThread;
+        Bruteforce bruteForceSolver;
         public MainWindow()
         {
             InitializeComponent();
@@ -111,13 +113,7 @@ namespace bdd_interface
             image.Source = new BitmapImage(source);
             table.Children.Add(image);
         }
-        public delegate void WaitToEndOfProccess(int n);
-        public delegate void ForInvoke();
-        void for_Button_Click_Go_1()
-        {
-            deleteLoandingAnimation();
-            stateToView.Content = string.Format("{0}/{1}", 1, solves.Length);
-        }
+        public delegate void WaitToEndOfProccess(int numberOfSolve, int tableSize, int init);
         private void Button_Click_Go(object sender, RoutedEventArgs e)
         {
 
@@ -128,12 +124,15 @@ namespace bdd_interface
                     proc.Kill();
                 }
             }
+            if (currentThread != null)
+            {
+                currentThread.Abort();
+            }
             showLoandingAnimation();
 
             int tableSize;
             if (int.TryParse(viewTableSize.Text, out tableSize))
             {
-                ForInvoke forButtonClickGo1 = for_Button_Click_Go_1;
                 if (tableSize == 2 && currentTactic < 3)
                 {
                     solves = new string[4];
@@ -144,8 +143,11 @@ namespace bdd_interface
                     this.tableSize = tableSize;
                     this.countOfSolves = solves.Length;
                     showSolveBrutforce(0, 2);
-                    
-                    Dispatcher.Invoke(forButtonClickGo1);
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        deleteLoandingAnimation();
+                        stateToView.Content = string.Format("{0}/{1}", 1, solves.Length);
+                    }));
                     return;
                 }
                 if (tableSize == 3 && currentTactic < 3)
@@ -162,29 +164,37 @@ namespace bdd_interface
                     this.tableSize = tableSize;
                     this.countOfSolves = solves.Length;
                     showSolveBrutforce(0, 3);
-                    Dispatcher.Invoke(forButtonClickGo1);
+                    Dispatcher.Invoke(new Action(() =>
+                    {
+                        deleteLoandingAnimation();
+                        stateToView.Content = string.Format("{0}/{1}", 1, solves.Length);
+                    }));
                     return;
                 }
                 if (currentTactic == 0)
                 {
-                    int firstSolve = 0;
                     BDDSolver solver = new BDDSolver();
                     proc = solver.proccess(tableSize);
-                    WaitToEndOfProccess waitToEndOfProccess = checkProccessIsEndCUDD;
-                    waitToEndOfProccess.BeginInvoke(tableSize, new AsyncCallback(showSolveCUDD), new Tuple<int, int>(firstSolve, tableSize));
+                    currentThread = new Thread(new ParameterizedThreadStart(checkProccessIsEndCUDD));
+                    //  waitToEndOfProccess.BeginInvoke(tableSize, new AsyncCallback(showSolveCUDD), new Tuple<int, int>(firstSolve, tableSize));
+                    var data = new Tuple<int, WaitToEndOfProccess>(tableSize, showSolveCUDD);
+                    currentThread.Start(data);
                 }
                 if (currentTactic == 1)
                 {
-                    Bruteforce solver = new Bruteforce();
-                    WaitToEndOfProccess waitToEndOfProccess = solver.initSolvesFullBrutforce;
-                    waitToEndOfProccess.BeginInvoke(tableSize, new AsyncCallback(showSolveBrutforce), new Tuple<Bruteforce, int>(solver, tableSize));
+                    bruteForceSolver = new Bruteforce();
+                    currentThread = new Thread(new ParameterizedThreadStart(bruteForceSolver.initSolvesFullBrutforce));
+
+                    var data = new Tuple<int, WaitToEndOfProccess>(tableSize, showSolveBrutforce);
+                    currentThread.Start(data);
                 }
                 if (currentTactic == 2)
                 {
-                    Bruteforce solver = new Bruteforce();
-                    WaitToEndOfProccess waitToEndOfProccess = solver.initSolvesOptimizeBrutforce;
-                    waitToEndOfProccess.BeginInvoke(tableSize, new AsyncCallback(showSolveBrutforce), new Tuple<Bruteforce, int>(solver, tableSize));
+                    bruteForceSolver = new Bruteforce();
+                    currentThread = new Thread(new ParameterizedThreadStart(bruteForceSolver.initSolvesOptimizeBrutforce));
 
+                    var data = new Tuple<int, WaitToEndOfProccess>(tableSize, showSolveBrutforce);
+                    currentThread.Start(data);
                 }
             }
             else
@@ -193,70 +203,42 @@ namespace bdd_interface
             }
 
         }
-
-        private void showSolveBrutforce(IAsyncResult resObj)
+        private void showSolveBrutforce(int numberOfSolveToView, int tableSize, int init = 0)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    grid.Children.Clear();
-            //    grid.Background = new SolidColorBrush(Colors.DarkGray);
-            //    currentSolve = 0;
-            //    Bruteforce solver = ((Tuple<Bruteforce, int>)resObj.AsyncState).Item1;
-            //    int tableSize = ((Tuple<Bruteforce, int>)resObj.AsyncState).Item2;
-
-            //    this.tableSize = tableSize;
-            //    importSolvesFullBruteforce(tableSize, solver);
-
-            //    Grid newTable = newTable = createTable(tableSize);
-            //    newTable.SetValue(Grid.RowProperty, 1);
-            //    newTable.SetValue(Grid.ColumnProperty, 1);
-
-            //    if (solves.Length > 0)
-            //    {
-            //        for (int i = 0; i < tableSize; i++)
-            //        {
-            //            for (int j = 0; j < tableSize; j++)
-            //            {
-            //                if (solves[currentSolve][i * tableSize + j] == '1')
-            //                {
-            //                    setCell(newTable, i, j);
-            //                }
-            //            }
-            //        }
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("Решений не найдено");
-            //    }
-            //    grid.Children.Add(newTable);
-            //    deleteLoandingAnimation();
-            //});
-        }
-        delegate void ForShowSolve(int a, int b);
-        ForShowSolve forShowSolveBrutforce = showSolveBrutforce;
-        private void showSolveBrutforce(int numberOfSolve, int tableSize)
-        {
-            Dispatcher.Invoke(
+            Dispatcher.Invoke(new Action(() =>
             {
-            grid.Children.Clear();
-            grid.Background = new SolidColorBrush(Colors.DarkGray);
-
-            Grid newTable  = createTable(tableSize);
-            newTable.SetValue(Grid.RowProperty, 1);
-            newTable.SetValue(Grid.ColumnProperty, 1);
-
-            for (int i = 0; i < tableSize; i++)
-            {
-                for (int j = 0; j < tableSize; j++)
+                if (init == 1)
                 {
-                    if (solves[numberOfSolve][i * tableSize + j] == '1')
+                    currentSolve = 0;
+                    this.tableSize = tableSize;
+                    importSolvesFullBruteforce(tableSize, bruteForceSolver);
+                    deleteLoandingAnimation();
+                }
+                grid.Children.Clear();
+                grid.Background = new SolidColorBrush(Colors.DarkGray);
+
+                Grid newTable = createTable(tableSize);
+                newTable.SetValue(Grid.RowProperty, 1);
+                newTable.SetValue(Grid.ColumnProperty, 1);
+                if (solves.Length > 0)
+                {
+                    for (int i = 0; i < tableSize; i++)
                     {
-                        setCell(newTable, i, j);
+                        for (int j = 0; j < tableSize; j++)
+                        {
+                            if (solves[numberOfSolveToView][i * tableSize + j] == '1')
+                            {
+                                setCell(newTable, i, j);
+                            }
+                        }
                     }
                 }
-            }
-            grid.Children.Add(newTable);
-            });
+                else
+                {
+                    MessageBox.Show("Решений не найдено");
+                }
+                grid.Children.Add(newTable);
+            }));
         }
 
         private void importSolvesFullBruteforce(int tableSize, Bruteforce solver)
@@ -396,59 +378,34 @@ namespace bdd_interface
                 }
             }
         }
-        public void showSolveCUDD(IAsyncResult resObj)
+        public void showSolveCUDD(int numberOfSolve, int tableSize, int init = 0)
         {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    grid.Children.Clear();
-            //    grid.Background = new SolidColorBrush(Colors.DarkGray);
-            //    currentSolve = 0;
-
-            //    int numberOfSolve = ((Tuple<int, int>)resObj.AsyncState).Item1;
-            //    int n = ((Tuple<int, int>)resObj.AsyncState).Item2;
-
-            //    tableSize = n;
-            //    importSolvesCUDD(n);
-            //    Grid newTable = newTable = createTable(n);
-            //    newTable.SetValue(Grid.RowProperty, 1);
-            //    newTable.SetValue(Grid.ColumnProperty, 1);
-            //    for (int i = 0; i < n; i++)
-            //    {
-            //        for (int j = 0; j < n; j++)
-            //        {
-            //            if (solves[numberOfSolve][i * n + j] == '1')
-            //            {
-            //                setCell(newTable, i, j);
-            //            }
-            //        }
-            //    }
-            //    grid.Children.Add(newTable);
-            //    deleteLoandingAnimation();
-            //});
-        }
-        public void showSolveCUDD(int numberOfSolve, int n)
-        {
-            //Dispatcher.Invoke(() =>
-            //{
-            //    grid.Children.Clear();
-            //    grid.Background = new SolidColorBrush(Colors.DarkGray);
-
-
-            //    Grid newTable = newTable = createTable(n);
-            //    newTable.SetValue(Grid.RowProperty, 1);
-            //    newTable.SetValue(Grid.ColumnProperty, 1);
-            //    for (int i = 0; i < n; i++)
-            //    {
-            //        for (int j = 0; j < n; j++)
-            //        {
-            //            if (solves[numberOfSolve][i * n + j] == '1')
-            //            {
-            //                setCell(newTable, i, j);
-            //            }
-            //        }
-            //    }
-            //    grid.Children.Add(newTable);
-            //});
+            Dispatcher.Invoke(new Action(() =>
+            {
+                if (init == 1)
+                {
+                    currentSolve = 0;
+                    this.tableSize = tableSize;
+                    importSolvesCUDD(tableSize);
+                    deleteLoandingAnimation();
+                }
+                grid.Children.Clear();
+                grid.Background = new SolidColorBrush(Colors.DarkGray);
+                Grid newTable = createTable(tableSize);
+                newTable.SetValue(Grid.RowProperty, 1);
+                newTable.SetValue(Grid.ColumnProperty, 1);
+                for (int i = 0; i < tableSize; i++)
+                {
+                    for (int j = 0; j < tableSize; j++)
+                    {
+                        if (solves[numberOfSolve][i * tableSize + j] == '1')
+                        {
+                            setCell(newTable, i, j);
+                        }
+                    }
+                }
+                grid.Children.Add(newTable);
+            }));
         }
         public void importSolvesCUDD(int n)
         {
@@ -510,8 +467,11 @@ namespace bdd_interface
             }
             return false;
         }
-        public void checkProccessIsEndCUDD(int n)
+        public void checkProccessIsEndCUDD(object objectData)
         {
+            Tuple<int, WaitToEndOfProccess> data = (Tuple<int, MainWindow.WaitToEndOfProccess>)objectData;
+            int tableSize = data.Item1;
+
             string pathToSolves = "solvers/cudd_solves.txt";
             string pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
             string pathIsFinish = "solvers/cudd_finished.txt";
@@ -521,13 +481,14 @@ namespace bdd_interface
             {
                 if (File.Exists(pathIsFinish))
                 {
-                    if (isItTrueFileCUDD(pathIsFinish, n))
+                    if (isItTrueFileCUDD(pathIsFinish, tableSize))
                         using (StreamReader sr = new StreamReader(pathToCountOfSolves))
                         {
                             var s = sr.ReadLine();
                             if (int.TryParse(s, out countOfSolve))
                             {
                                 File.Delete(pathIsFinish);
+                                data.Item2(0, tableSize, 1);
                                 return;
                             }
                             //else   баги
@@ -537,17 +498,20 @@ namespace bdd_interface
                             //}
                         }
                 }
-                Thread.Sleep(500);
-                if (proc.HasExited&&!messageShowed)
+                else
                 {
-                    MessageBox.Show("Произошла ошика, скорее всего у вас не достаточно оперативной памяти для решения данной задачи","Ошибка",
-                        MessageBoxButton.OK,MessageBoxImage.Error);
-                    messageShowed = true;
-                    //Dispatcher.Invoke(() => deleteLoandingAnimation());
+                    if (proc.HasExited && !messageShowed)
+                    {
+                        MessageBox.Show("Произошла ошибка, скорее всего у вас не достаточно оперативной памяти для решения данной задачи", "Ошибка",
+                            MessageBoxButton.OK, MessageBoxImage.Error);
+                        messageShowed = true;
+                        Dispatcher.Invoke(new Action(() => deleteLoandingAnimation()));
+                        return;
+                    }
                 }
+                Thread.Sleep(500);
             }
         }
-
 
 
         protected override void OnClosed(EventArgs e)

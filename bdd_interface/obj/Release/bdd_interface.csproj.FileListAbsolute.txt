@@ -14,3 +14,4 @@ C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.csproj.GenerateResource.Cache
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.exe
 C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.pdb
+C:\Users\Dragon116rus\Documents\Visual Studio 2015\Projects\bdd_interface4.0\bdd_interface\obj\Release\bdd_interface.csprojResolveAssemblyReference.cache

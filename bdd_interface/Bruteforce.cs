@@ -9,8 +9,11 @@ namespace bdd_interface
     class Bruteforce
     {
         public string[] solves { get; set; }
-        public void initSolvesFullBrutforce(int tableSize)
+        public void initSolvesFullBrutforce(object objectData)
         {
+            Tuple<int, MainWindow.WaitToEndOfProccess> data = (Tuple<int, MainWindow.WaitToEndOfProccess>)objectData;
+            int tableSize = data.Item1;
+
             List<string> solves = new List<string>();
             bool[][] vars = new bool[tableSize][];
             for (int i = 0; i < tableSize; i++)
@@ -26,9 +29,13 @@ namespace bdd_interface
                 }
             } while (!isOnlyNulls(ref vars));
             this.solves = solves.ToArray();
+
+            data.Item2(0, tableSize, 1);
         }
-        public void initSolvesOptimizeBrutforce(int tableSize)
+        public void initSolvesOptimizeBrutforce(object objectData)
         {
+            Tuple<int, MainWindow.WaitToEndOfProccess> data= (Tuple < int, MainWindow.WaitToEndOfProccess > )objectData;
+            int tableSize = data.Item1;
 
             List<string> solves = new List<string>();
             bool[][] vars = getNewTable(tableSize);
@@ -42,7 +49,7 @@ namespace bdd_interface
                 }
             }
             this.solves = solves.ToArray();
-
+            data.Item2(0, tableSize, 1);
         }
 
         private bool[][] getNewTable(int tableSize)
