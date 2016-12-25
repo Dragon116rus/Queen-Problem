@@ -38,9 +38,15 @@ namespace bdd_interface
         string pathToSolves;
         string pathToCountOfSolves;
         int currentTactic = 0;
-        string[] tacticNames = { "CUDD(fast)", "Полный перебор", "Урезаный перебор" };
+        string[] tacticNames = { "BDD-опт.", "Полный перебор", "Урезаный перебор", "Игра" };
         Thread currentThread;
         Bruteforce bruteForceSolver;
+        Thread timerThread;
+        bool isFirstStart = true;
+        int countCellsToSet = 3;
+        Grid table;
+        bool[,] varTables;
+        bool[,] varTablesMain;
         public MainWindow()
         {
             InitializeComponent();
@@ -65,17 +71,17 @@ namespace bdd_interface
             image.Source = new BitmapImage(source);
             grid.Children.Add(image);
         }
-        public Grid createTable(int sizeOfTable)
+        public Grid createTable(int tableSize)
         {
             Grid newTable = new Grid();
-            for (int i = 0; i < sizeOfTable; i++)
+            for (int i = 0; i < tableSize; i++)
             {
                 newTable.RowDefinitions.Add(new RowDefinition());
                 newTable.ColumnDefinitions.Add(new ColumnDefinition());
             }
-            for (int i = 0; i < sizeOfTable; i++)
+            for (int i = 0; i < tableSize; i++)
             {
-                for (int j = 0; j < sizeOfTable; j++)
+                for (int j = 0; j < tableSize; j++)
                 {
                     Canvas canvas = new Canvas();
                     if ((i + j) % 2 == 0)
@@ -113,6 +119,148 @@ namespace bdd_interface
             image.Source = new BitmapImage(source);
             table.Children.Add(image);
         }
+        public void setClickableCell(Grid table, int i, int j)
+        {
+            Button button = new Button();
+            button.SetValue(Grid.RowProperty, i);
+            button.SetValue(Grid.ColumnProperty, j);
+            button.Background = new SolidColorBrush(Colors.Transparent);
+            button.BorderThickness = new Thickness(0);
+            button.DataContext = (object)(new Tuple<int, int>(i, j));
+            button.Click += checkQueen;
+            table.Children.Add(button);
+        }
+
+        private void checkQueen(object sender, RoutedEventArgs e)
+        {
+            Button button = (Button)sender;
+            Tuple<int, int> data = (Tuple<int, int>)button.DataContext;
+            if (!isQueenCell(data.Item1, data.Item2))
+            {
+                if (isValidPlace(data.Item1, data.Item2))
+                {
+                    varTables[data.Item1, data.Item2] = true;
+                    clearTable();
+                    setCells();
+                    checkIsEndOfGame();
+                }
+            }
+            else
+            {
+                varTables[data.Item1, data.Item2] = false;
+                clearTable();
+                setCells();
+            }
+        }
+
+        private void checkIsEndOfGame()
+        {
+            int countOfQueen = 0;
+            for (int i = 0; i < tableSize; i++)
+            {
+                for (int j = 0; j < tableSize; j++)
+                {
+                    if (varTables[i, j] == true)
+                        countOfQueen++;
+                }
+            }
+            if (countOfQueen==tableSize)
+            {
+                MessageBox.Show("Поздравляем");
+            }
+        }
+
+        private void setCells()
+        {
+            for (int i = 0; i < tableSize; i++)
+            {
+                for (int j = 0; j < tableSize; j++)
+                {
+                    if (varTables[i, j] == true)
+                    {
+                        setCell(table, i, j);                       
+                    }
+                    if (varTablesMain[i, j] == false)
+                    {
+                        if (varTables[i, j] == true)
+                        {
+                            setClickableCellQueen(table, i, j);
+                        }
+                        else
+                        {
+                            setClickableCell(table, i, j);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void setClickableCellQueen(Grid table, int i, int j)
+        {
+            Button button = new Button();
+            Uri source = new Uri(@"/bdd_interface;component/img/black.gif", UriKind.Relative);
+            button.Background =new ImageBrush(new BitmapImage(source));
+            button.SetValue(Grid.RowProperty, i);
+            button.SetValue(Grid.ColumnProperty, j);
+            button.Background = new SolidColorBrush(Colors.Transparent);
+            button.BorderThickness = new Thickness(0);
+            button.DataContext = (object)(new Tuple<int, int>(i, j));
+            button.Click += checkQueen;
+            table.Children.Add(button);
+        }
+
+        private void clearTable()
+        {
+            table.Children.Clear();
+            for (int i = 0; i < tableSize; i++)
+            {
+                for (int j = 0; j < tableSize; j++)
+                {
+                    Canvas canvas = new Canvas();
+                    if ((i + j) % 2 == 0)
+                    {
+                        canvas.Background = new SolidColorBrush(whiteColor);
+                    }
+                    else
+                    {
+                        canvas.Background = new SolidColorBrush(blackColor);
+                    }
+                    canvas.SetValue(Grid.RowProperty, i);
+                    canvas.SetValue(Grid.ColumnProperty, j);
+                    table.Children.Add(canvas);
+                }
+            }
+        }
+
+        private bool isValidPlace(int item1, int item2)
+        {
+            for (int i = 0; i < tableSize; i++)
+            {
+                if (varTables[item1, i] || varTables[i, item2])
+                    return false;
+            }
+            for (int i = 0; i < tableSize; i++)
+            {
+                if (item2 - item1 + i < tableSize && item2 - item1 + i >= 0)
+                    if (varTables[i, item2 - item1 + i])
+                        return false;
+            }
+            for (int i = -tableSize; i < tableSize; i++)
+            {
+                if (item1 + i < tableSize && item2 - i >= 0 && item1 + i >= 0 && item2 - i < tableSize)
+                    if (varTables[item1 + i, item2 - i])
+                        return false;
+            }
+            return true;
+        }
+
+        private bool isQueenCell(int item1, int item2)
+        {
+            if (varTables[item1, item2] == true)
+                return true;
+            return false;
+        }
+
         public delegate void WaitToEndOfProccess(int numberOfSolve, int tableSize, int init);
         private void Button_Click_Go(object sender, RoutedEventArgs e)
         {
@@ -128,6 +276,21 @@ namespace bdd_interface
             {
                 currentThread.Abort();
             }
+            if (timerThread != null)
+            {
+                timerThread.Abort();
+            }
+            if (isFirstStart)
+            {
+                isFirstStart = false;
+                ColumnDefinition columnDefinition = new ColumnDefinition();
+                columnDefinition.Width = new GridLength(2, GridUnitType.Star);
+                gridWithTimer.ColumnDefinitions.Add(columnDefinition);
+                gridWithTimer.ColumnDefinitions.Add(new ColumnDefinition());
+            }
+            timerThread = new Thread(new ThreadStart(startTimer));
+            timerThread.Start();
+
             showLoandingAnimation();
 
             int tableSize;
@@ -196,6 +359,22 @@ namespace bdd_interface
                     var data = new Tuple<int, WaitToEndOfProccess>(tableSize, showSolveBrutforce);
                     currentThread.Start(data);
                 }
+                if (currentTactic == 3)
+                {
+                    if (timerThread != null)
+                    {
+                        timerThread.Abort();
+                    }
+                    string toViewTime = string.Format("{0} : {1} : {2}", 0, 0, 0);
+                    Dispatcher.Invoke(new Action(() => timer.Content = toViewTime));
+
+                    BDDSolver solver = new BDDSolver();
+                    proc = solver.proccess(tableSize);
+                    currentThread = new Thread(new ParameterizedThreadStart(checkProccessIsEndCUDD));
+                    //  waitToEndOfProccess.BeginInvoke(tableSize, new AsyncCallback(showSolveCUDD), new Tuple<int, int>(firstSolve, tableSize));
+                    var data = new Tuple<int, WaitToEndOfProccess>(-tableSize, showSolveCUDD);
+                    currentThread.Start(data);
+                }
             }
             else
             {
@@ -213,6 +392,7 @@ namespace bdd_interface
                     this.tableSize = tableSize;
                     importSolvesFullBruteforce(tableSize, bruteForceSolver);
                     deleteLoandingAnimation();
+                    stopTimer();
                 }
                 grid.Children.Clear();
                 grid.Background = new SolidColorBrush(Colors.DarkGray);
@@ -249,12 +429,12 @@ namespace bdd_interface
             stateToView.Content = string.Format("{0}/{1}", 1, solves.Length);
         }
 
+
         private void showLoandingAnimation()
         {
             importButton.Visibility = Visibility.Hidden;
             socketToLoandingAnimation.Visibility = Visibility.Visible;
         }
-
         private void initLoandingAnimation()
         {
             Image image = new Image();
@@ -278,12 +458,8 @@ namespace bdd_interface
             importButton.Visibility = Visibility.Visible;
         }
 
-        private void Button_Click_Export_Solves(object sender, RoutedEventArgs e)
-        {
-            SaveFileDialog sfd = new SaveFileDialog();
-            sfd.ShowDialog();
-            exportSolvesCUDD(sfd.FileName, solves, tableSize);
-        }
+
+
 
         private void exportSolvesCUDD(string fileName, string[] solves, int tableSize)
         {
@@ -320,64 +496,6 @@ namespace bdd_interface
                 MessageBox.Show("Ошибка экспорта данных");
             }
         }
-
-        private void Button_Show_Next_Solve(object sender, RoutedEventArgs e)
-        {
-            if (solves == null)
-            {
-                return;
-            }
-            if (currentTactic == 0)
-            {
-                if (currentSolve < Math.Min(600, countOfSolves) - 1)
-                {
-                    currentSolve++;
-                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
-                    showSolveCUDD(currentSolve, tableSize);
-                }
-                else
-                {
-                    if (currentSolve == 598)
-                    {
-                        MessageBox.Show("Остальные решения можно только выгрузить");
-                    }
-                }
-            }
-            if (currentTactic == 1 || currentTactic == 2)
-            {
-                if (currentSolve < countOfSolves - 1)
-                {
-                    currentSolve++;
-                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
-                    showSolveBrutforce(currentSolve, tableSize);
-                }
-            }
-        }
-        private void Button_Show_Prev_Solve(object sender, RoutedEventArgs e)
-        {
-            if (solves == null)
-            {
-                return;
-            }
-            if (currentTactic == 0)
-            {
-                if (currentSolve > 0)
-                {
-                    currentSolve--;
-                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
-                    showSolveCUDD(currentSolve, tableSize);
-                }
-            }
-            if (currentTactic == 1 || currentTactic == 2)
-            {
-                if (currentSolve > 0)
-                {
-                    currentSolve--;
-                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
-                    showSolveBrutforce(currentSolve, tableSize);
-                }
-            }
-        }
         public void showSolveCUDD(int numberOfSolve, int tableSize, int init = 0)
         {
             Dispatcher.Invoke(new Action(() =>
@@ -388,25 +506,89 @@ namespace bdd_interface
                     this.tableSize = tableSize;
                     importSolvesCUDD(tableSize);
                     deleteLoandingAnimation();
+                    stopTimer();
+                }
+                if (init == -1)
+                {
+                    currentSolve = 0;
+                    this.tableSize = tableSize;
+                    importSolvesCUDD(tableSize);
+                    deleteLoandingAnimation();
                 }
                 grid.Children.Clear();
                 grid.Background = new SolidColorBrush(Colors.DarkGray);
                 Grid newTable = createTable(tableSize);
+                table = newTable;
                 newTable.SetValue(Grid.RowProperty, 1);
                 newTable.SetValue(Grid.ColumnProperty, 1);
-                for (int i = 0; i < tableSize; i++)
+                if (init != -1)
                 {
-                    for (int j = 0; j < tableSize; j++)
+                    for (int i = 0; i < tableSize; i++)
                     {
-                        if (solves[numberOfSolve][i * tableSize + j] == '1')
+                        for (int j = 0; j < tableSize; j++)
                         {
-                            setCell(newTable, i, j);
+                            if (solves[numberOfSolve][i * tableSize + j] == '1')
+                            {
+                                setCell(newTable, i, j);
+                            }
                         }
                     }
+                }
+                if (init == -1)
+                {
+                    setCellByRandom(newTable, tableSize);
                 }
                 grid.Children.Add(newTable);
             }));
         }
+
+        private void setCellByRandom(Grid newTable, int tableSize)
+        {
+            varTables = new bool[tableSize, tableSize];
+            varTablesMain = new bool[tableSize, tableSize];
+            Random random = new Random(DateTime.Now.Millisecond);
+            int numberOfSolve = random.Next(solves.Length - 1);
+            int[] toView = setRandomNumbers(random, countCellsToSet, tableSize);
+            for (int i = 0; i < tableSize; i++)
+            {
+                for (int j = 0; j < tableSize; j++)
+                {
+                    if (toView.Contains(i) && solves[numberOfSolve][i * tableSize + j] == '1')
+                    {
+                        setCell(newTable, i, j);
+                        varTables[i, j] = true;
+                        varTablesMain[i, j] = true;
+                    }
+                    else
+                    {
+                        setClickableCell(newTable, i, j);
+                    }
+                }
+            }
+        }
+
+        private int[] setRandomNumbers(Random random, int countCellsToSet, int tableSize)
+        {
+            int[] result = new int[countCellsToSet];
+            for (int i = 0; i < countCellsToSet; i++)
+            {
+                result[i] = -1;
+            }
+            for (int i = 0; i < countCellsToSet; i++)
+            {
+                while (true)
+                {
+                    int randomNumber = random.Next(tableSize);
+                    if (!result.Contains(randomNumber))
+                    {
+                        result[i] = randomNumber;
+                        break;
+                    }
+                }
+            }
+            return result;
+        }
+
         public void importSolvesCUDD(int n)
         {
 
@@ -471,7 +653,12 @@ namespace bdd_interface
         {
             Tuple<int, WaitToEndOfProccess> data = (Tuple<int, MainWindow.WaitToEndOfProccess>)objectData;
             int tableSize = data.Item1;
-
+            int init = 1;
+            if (tableSize < 0)
+            {
+                init = -1;
+                tableSize = -tableSize;
+            }
             string pathToSolves = "solvers/cudd_solves.txt";
             string pathToCountOfSolves = "solvers/cudd_countOfSolves.txt";
             string pathIsFinish = "solvers/cudd_finished.txt";
@@ -488,7 +675,7 @@ namespace bdd_interface
                             if (int.TryParse(s, out countOfSolve))
                             {
                                 File.Delete(pathIsFinish);
-                                data.Item2(0, tableSize, 1);
+                                data.Item2(0, tableSize, init);
                                 return;
                             }
                             //else   баги
@@ -509,11 +696,105 @@ namespace bdd_interface
                         return;
                     }
                 }
-                Thread.Sleep(500);
+                Thread.Sleep(100);
             }
         }
 
+        public void startTimer()
+        {
+            DateTime startTime = DateTime.Now;
+            while (true)
+            {
+                TimeSpan delta = DateTime.Now - startTime;
+                string toViewTime = string.Format("{0} : {1} : {2}",
+                    (int)delta.TotalMinutes,
+                    delta.Seconds,
+                    delta.Milliseconds);
+                Dispatcher.Invoke(new Action(() => timer.Content = toViewTime));
+                Thread.Sleep(77);
+            }
+        }
+        public void stopTimer()
+        {
+            if (timerThread != null)
+            {
+                timerThread.Abort();
+            }
+        }
 
+        private void Button_Click_Export_Solves(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.ShowDialog();
+            exportSolvesCUDD(sfd.FileName, solves, tableSize);
+        }
+        private void Button_Show_Next_Solve(object sender, RoutedEventArgs e)
+        {
+            if (solves == null)
+            {
+                return;
+            }
+            if (currentTactic == 0)
+            {
+                if (currentSolve < Math.Min(600, countOfSolves) - 1)
+                {
+                    currentSolve++;
+                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
+                    showSolveCUDD(currentSolve, tableSize);
+                }
+                else
+                {
+                    if (currentSolve == 598)
+                    {
+                        MessageBox.Show("Остальные решения можно только выгрузить");
+                    }
+                }
+            }
+            if (currentTactic == 1 || currentTactic == 2)
+            {
+                if (currentSolve < countOfSolves - 1)
+                {
+                    currentSolve++;
+                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
+                    showSolveBrutforce(currentSolve, tableSize);
+                }
+            }
+        }
+        private void Button_Show_Prev_Solve(object sender, RoutedEventArgs e)
+        {
+            if (solves == null)
+            {
+                return;
+            }
+            if (currentTactic == 0)
+            {
+                if (currentSolve > 0)
+                {
+                    currentSolve--;
+                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
+                    showSolveCUDD(currentSolve, tableSize);
+                }
+            }
+            if (currentTactic == 1 || currentTactic == 2)
+            {
+                if (currentSolve > 0)
+                {
+                    currentSolve--;
+                    stateToView.Content = string.Format("{0}/{1}", currentSolve + 1, countOfSolves);
+                    showSolveBrutforce(currentSolve, tableSize);
+                }
+            }
+        }
+        private void Button_Click_Next_Tactic(object sender, RoutedEventArgs e)
+        {
+            currentTactic = (currentTactic + 1) % tacticNames.Length;
+            nameOfTactic.Content = tacticNames[currentTactic];
+        }
+        private void Button_Click_Prev_Tactic(object sender, RoutedEventArgs e)
+        {
+            currentTactic = (currentTactic - 1 + tacticNames.Length) % tacticNames.Length;
+            nameOfTactic.Content = tacticNames[currentTactic];
+        }
         protected override void OnClosed(EventArgs e)
         {
             if (proc != null)
@@ -524,18 +805,15 @@ namespace bdd_interface
                 }
 
             }
+            if (currentThread != null)
+            {
+                currentThread.Abort();
+            }
+            if (timerThread != null)
+            {
+                timerThread.Abort();
+            }
             base.OnClosed(e);
-        }
-
-        private void Button_Click_Next_Tactic(object sender, RoutedEventArgs e)
-        {
-            currentTactic = (currentTactic + 1) % tacticNames.Length;
-            nameOfTactic.Content = tacticNames[currentTactic];
-        }
-        private void Button_Click_Prev_Tactic(object sender, RoutedEventArgs e)
-        {
-            currentTactic = (currentTactic - 1 + tacticNames.Length) % tacticNames.Length;
-            nameOfTactic.Content = tacticNames[currentTactic];
         }
     }
 }

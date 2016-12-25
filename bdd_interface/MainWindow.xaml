@@ -36,8 +36,11 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Background="Transparent" BorderBrush="Transparent" Click="Button_Click_Prev_Tactic">
                 <Image Source="/bdd_interface;component/img/arrow.png" ></Image>
-            </Button>    
-            <Label Grid.Column="1" HorizontalAlignment="Center" x:Name="nameOfTactic" FontSize="9">CUDD</Label>
+            </Button>
+            <Grid x:Name="gridWithTimer" Grid.Column="1">
+                <Label Grid.Column="0" HorizontalAlignment="Center" x:Name="nameOfTactic" FontSize="9">CUDD</Label>
+                <Label Grid.Column="1" HorizontalAlignment="Center" x:Name="timer" FontSize="9" ></Label>
+            </Grid>
             <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" Click="Button_Click_Next_Tactic">
                 <Image  Source="/bdd_interface;component/img/arrow.png" RenderTransformOrigin="0.5,0.5">
                     <Image.RenderTransform>
@@ -54,8 +57,8 @@
 
         </Grid>
         <Grid Grid.Row="2" Grid.Column="1">
-             <Button Grid.Column="1" Background="White" BorderThickness="2" Click="Button_Click_Go" >Поиск</Button>
-             </Grid>
+            <Button Grid.Column="1" Background="White" BorderThickness="2" Click="Button_Click_Go" >Поиск</Button>
+        </Grid>
         <Grid Grid.Row="4" Grid.Column="1" x:Name="grid">
             <Grid.RowDefinitions>
                 <RowDefinition Height="0.2*"></RowDefinition>
